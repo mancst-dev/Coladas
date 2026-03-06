@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciando Descarga...</title>
+</head>
+<body>
+    <h1>Preparando Descarga...</h1>
+    <p>La descarga del archivo "{{ original_name }}.xlsx" debería comenzar en breve.</p>
+    <p>Serás redirigido a la página principal automáticamente.</p>
+
+    <script>
+        // 1. Obtener la URL de la descarga real
+        var downloadUrl = "{{ url_for('archivo_descarga', filename=filename, original_name=original_name) }}";
+
+        // 2. Crear un enlace de descarga invisible
+        var link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = "{{ original_name }}.xlsx"; // No siempre necesario, pero ayuda
+        document.body.appendChild(link);
+        
+        // 3. Simular un clic para iniciar la descarga
+        link.click();
+        
+        // 4. Limpiar el enlace
+        document.body.removeChild(link);
+
+        // 5. Redirigir a la página principal (index) después de un pequeño retraso
+        // 1500 milisegundos (1.5 segundos) es tiempo suficiente para que inicie la descarga
+        setTimeout(function() {
+            window.location.href = "{{ url_for('index') }}";
+        }, 1500); 
+    </script>
+</body>
+</html>
