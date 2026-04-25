@@ -7,8 +7,8 @@ import sys
 from camelot.core import TableList
 from flask import Flask, request, jsonify, redirect, url_for, send_file, render_template, flash, after_this_request, make_response, session
 from werkzeug.utils import secure_filename
-import time #importo time para generar archivos unicos
-import shutil #importo shutil para limpiar la info contenida en carpetas
+import time #generar archivos unicos
+import shutil #limpiar info contenida en carpetas
 
 #carpeta para archivos pdfs subidos
 SUBIDA_ARCHIVOS = 'subida'
@@ -39,10 +39,10 @@ def pdf_xls(archivoPdf_ruta, excelGenerado_ruta):
     print(f"Extrayendo tablas de: {archivoPdf_ruta}")
 
     try:
-        #Intento extraer la tabla usando el flavor lattice que funciona con bordes
+        #extraertabla usando el flavor lattice con bordes
         tables = camelot.read_pdf(archivoPdf_ruta, pages="all", flavor="lattice")
         if not isinstance(tables, TableList) or tables.n == 0:
-            #si 'lattice' no encuentra nada, pruebo con 'stream' sin bordes
+            #si 'lattice' no encuentra nada, con 'stream' sin bordes
             #tables = camelot.read_pdf(archivoPdf_ruta, pages="all", flavor="stream")
             #if tables.n == 0:
             raise ValueError(f"No se pudo extraer ninguna tabla del archivo pdf '{archivoPdf_ruta}'.")
@@ -80,20 +80,20 @@ def pdf_xls(archivoPdf_ruta, excelGenerado_ruta):
 # @app.route('/')
 @app.route('/')
 def index():
-    # Asume que el HTML está en 'templates/pdf_to_xls.html'
+    # HTML estáen 'templates/pdf_to_xls.html'
     # session.pop('limpiar_input', None) # declarar el input para limpiarlo
     return render_template('Index.html')
 
 #Muestra el formulario de subida pdf a xlsx(ruta corregida)
 @app.route('/upload')
 def frm_subida():
-    # Asume que el HTML está en 'templates/pdf_to_xls.html'
+    # HTMLestá en 'templates/pdf_to_xls.html'
     return render_template('pdf_to_xls.html')
 
-# Procesa la subida del archivo. Esta ruta es llamada por el action del formulario.
+# Procesa subida del archivo. ruta es llamada action del formulario.
 @app.route('/convert', methods=['POST'])
 def convertir_archivo():
-    #verificar si el campo 'pdfFile' está en la solicitud
+    #verificar si el campo 'pdfFile' está ensolicitud
     if 'pdfFile' not in request.files:
         flash('No se encontró el campo de archivo en el formulario.', 'error')
         return redirect(url_for('index')) # Redirigir a 'index'
@@ -129,15 +129,13 @@ def convertir_archivo():
             print(f"error al limpiar el pdf temporal: {e}")
 
         if success:
-            # AÑADIDO: Mensaje flash de éxito antes de la descarga.
-            # Se verá la próxima vez que el usuario cargue una plantilla (ej. index)
             flash(f'¡Conversión exitosa! El archivo "{nom_archivo_base}.xlsx" se está descargando.', 'success')
             
-            #si la conversión es exitosa, redirige a la descarga
+            #exitosa, redirige adescarga
             # session['limpiar_input']=True #declaramos que el input se limpie
             return redirect(url_for('archivo_descarga', filename=nom_archivo_salida, original_name=nom_archivo_base))
         else:
-            #si falla, muestra el mensaje de error
+            #si falla
             flash(f"Error en la conversión: {result}", 'error')
         return redirect(url_for('index'))
     else:
@@ -199,16 +197,6 @@ def archivo_descarga(filename):
             return redirect(url_for('index'))
             
         # finally:
-            # Esta lógica debe ejecutarse inmediatamente después de que send_file termine
-            # de preparar el stream de datos, o en un mecanismo que asegure la eliminación.
-            # En muchos servidores, es mejor que un trabajo de limpieza aparte elimine estos archivos
-            # viejos para evitar el WinError 32. 
-            # Como alternativa temporal, podemos esperar un poco o usar el patrón de tempfile,
-            # pero el error 32 es recurrente si el archivo no se cierra correctamente antes del os.remove.
-            # Para el propósito de esta corrección, mantendremos la limpieza simple
-            # y asumiremos que el problema se soluciona con el make_response.
-            # Si el error persiste, la solución profesional es un *cleanup job*.
-            # pass
 
     return "Archivo no encontrado o ya fue descargado.", 404
 
